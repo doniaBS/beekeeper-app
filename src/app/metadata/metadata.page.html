@@ -5,7 +5,9 @@
 </ion-header>
 
 <ion-content>
-  <pre>{{ metadata | json }}</pre>
-  <ion-button expand="full" (click)="getMetadata()">
-  </ion-button>
+  <div *ngIf="metadata">
+    <pre>{{ metadata | json }}</pre>
+    <ion-button (click)="syncMetadata()">Synchronize</ion-button>
+    <ion-spinner *ngIf="isSyncing"></ion-spinner>
+  </div>
 </ion-content>
