@@ -1,0 +1,11 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Metadata</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <pre>{{ metadata | json }}</pre>
+  <ion-button expand="full" (click)="getMetadata()">
+  </ion-button>
+</ion-content>

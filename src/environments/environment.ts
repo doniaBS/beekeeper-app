@@ -3,7 +3,12 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  //gatewayUrl: 'https://your-gateway-url',
+  //pinataApiKey: 'your-pinata-api-key',
+  //pinataSecretApiKey: 'your-pinata-secret-api-key',
+  //contractAddress: 'your-contract-address',
+  //contractAbi: [...] // Your contract ABI
 };
 
 /*

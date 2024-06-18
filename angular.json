@@ -13,6 +13,13 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "allowedCommonJsDependencies": [
+              "crc-32",
+              "@ethereumjs/rlp",
+              "setimmediate",
+              "cross-fetch",
+              "@metamask/detect-provider"
+            ],
             "outputPath": "www",
             "index": "src/index.html",
             "main": "src/main.ts",
