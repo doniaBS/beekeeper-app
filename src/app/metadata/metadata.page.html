@@ -7,7 +7,9 @@
 <ion-content>
   <div *ngIf="metadata">
     <pre>{{ metadata | json }}</pre>
-    <ion-button (click)="syncMetadata()">Synchronize</ion-button>
-    <ion-spinner *ngIf="isSyncing"></ion-spinner>
+  </div>
+  <div *ngIf="!metadata">
+    <ion-spinner></ion-spinner>
+    <p>Loading metadata...</p>
   </div>
 </ion-content>

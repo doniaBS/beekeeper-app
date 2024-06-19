@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  gatewayUrl: 'http://localhost:8000/',
+  gatewayWsUrl: 'ws://localhost:8765'
   //pinataApiKey: 'your-pinata-api-key',
   //pinataSecretApiKey: 'your-pinata-secret-api-key',
   //contractAddress: 'your-contract-address',
