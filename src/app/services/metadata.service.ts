@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import * as crypto from 'crypto-js';
+import Web3 from 'web3';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -9,8 +11,12 @@ export class MetadataService {
   private socket!: WebSocket;
   private metadataSubject: Subject<any> = new Subject();
   private sharedSecret: string = 'dOnIaLIPAH24Techoney';
+  private web3: Web3;
+  private contract: any;
 
   constructor() { 
+    this.web3 = new Web3('http://localhost:7545'); // Connect to Ganache
+    this.contract = new this.web3.eth.Contract(environment.contractABI, environment.contractAddress);
     this.connect();
   }
 
@@ -35,8 +41,9 @@ export class MetadataService {
       this.socket.send('Bearer valid_token');
     };
 
-    this.socket.onmessage = (message) => {
+    this.socket.onmessage = async (message) => {
       const data = JSON.parse(message.data);
+      console.log(data);
 
       // Extract nonce, timestamp, and hash
       const nonce = data.nonce;
@@ -50,6 +57,17 @@ export class MetadataService {
       if (calculatedHash === receivedHash) {
         console.log('Hashes match. Authentication successful.');
         this.metadataSubject.next(metadata);
+
+        // Process metadata and interact with the smart contract
+        const beekeeperId = metadata.beekeeper_id;
+        console.log(beekeeperId)
+        try {
+        const beekeeperAddress = await this.getBeekeeperAddress(beekeeperId);
+        console.log(`Beekeeper Address: ${beekeeperAddress}`);
+      } catch (error) {
+        console.error('Error retrieving beekeeper address:', error);
+      }
+
       } else {
         console.error('Hashes do not match. Authentication failed.');
       }
@@ -67,5 +85,19 @@ export class MetadataService {
 
   getMetadata(): Observable<any> {
     return this.metadataSubject.asObservable();
+  }
+
+  // Function to get the beekeeper address from the smart contract
+  private async getBeekeeperAddress(beekeeperId: number): Promise<string> {
+    const accounts = await this.web3.eth.getAccounts();
+    console.log(`Calling getBeekeeperAddress with beekeeperId: ${beekeeperId}`);
+    console.log(`Using account: ${accounts[0]}`);
+    try {
+      const beekeeperAddress = await this.contract.methods.getBeekeeperAddress(beekeeperId).call({ from: accounts[0] });
+      return beekeeperAddress;
+    } catch (error) {
+      console.error('Smart contract call failed:', error);
+      throw error;
+    }
   }
 }
