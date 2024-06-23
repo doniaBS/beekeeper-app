@@ -14,10 +14,27 @@
           <td class="value">{{ metadata[key] }}</td>
         </tr>
       </table>
+      <div *ngIf="isSyncing" class="syncing">
+        <ion-spinner></ion-spinner>
+        <p class="syncing-text">Syncing metadata to IPFS...</p>
+      </div>
     </div>
     <ng-template #loading>
       <ion-spinner></ion-spinner>
       <p class="loading-text">Loading metadata...</p>
     </ng-template>
+    <div *ngIf="!metadata && lastMatchingMetadata">
+      <h2>Last Matching Beekeeper Metadata</h2>
+      <table>
+        <tr *ngFor="let key of lastMatchingMetadataKeys">
+          <td class="key">{{ key }}</td>
+          <td class="value">{{ lastMatchingMetadata[key] }}</td>
+        </tr>
+      </table>
+      <div *ngIf="isSyncing" class="syncing">
+        <ion-spinner></ion-spinner>
+        <p class="syncing-text">Syncing metadata to IPFS...</p>
+      </div>
+    </div>
   </div>
 </ion-content>

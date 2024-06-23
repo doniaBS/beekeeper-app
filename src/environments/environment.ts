@@ -57,9 +57,9 @@ export const environment = {
       "signature": "0xb137ca64"
     }
   ],
-  contractAddress : '0x16EBeb44B715379db53Bde3FaE8879274dEaf51c'
-  //pinataApiKey: 'your-pinata-api-key',
-  //pinataSecretApiKey: 'your-pinata-secret-api-key',
+  contractAddress : '0x16EBeb44B715379db53Bde3FaE8879274dEaf51c',
+  pinataApiKey: 'd4ff07b0e166ec5b7db8',
+  pinataSecretApiKey: '1da36dca5acaa1640cf937790bf16129e9dc9d97c6c1d32df5c16d402b0ed0da',
 };
 
 /*
