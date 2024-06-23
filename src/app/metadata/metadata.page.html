@@ -8,11 +8,11 @@
   <div *ngIf="metadata">
     <pre>{{ metadata | json }}</pre>
   </div>
-  <div *ngIf="!metadata">
+  <div *ngIf="!metadata && !lastMatchingMetadata">
     <ion-spinner></ion-spinner>
     <p>Loading metadata...</p>
   </div>
-  <div *ngIf="metadata === null">
+  <div *ngIf="metadata === null && !lastMatchingMetadata">
     <p>No matching metadata found for the logged-in beekeeper address.</p>
   </div>
 </ion-content>

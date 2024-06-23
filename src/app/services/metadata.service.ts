@@ -23,6 +23,7 @@ export class MetadataService {
   private beekeeperAddress: string | null = null;
   private provider: MetaMaskEthereumProvider | null = null;
   private loggedInAccount: string | null = null;
+  private lastMatchingMetadata: any = null;
 
   constructor(private router: Router) { 
     this.web3 = new Web3(Web3.givenProvider || 'http://localhost:7545'); // Connect to Ganache
@@ -77,20 +78,21 @@ export class MetadataService {
 
         // Check if the beekeeperAddress matches the loggedInAccount
           if (beekeeperAddress.toLowerCase() === this.loggedInAccount?.toLowerCase()) {
+            this.lastMatchingMetadata = metadata; // Store the matching metadata
             this.metadataSubject.next(metadata);
           } else {
             console.warn('Beekeeper address does not match the logged-in account');
-            this.metadataSubject.next(null); // Emit null or empty data to indicate no match
+            this.metadataSubject.next(this.lastMatchingMetadata); // Emit the last matching metadata
           }
 
       } catch (error) {
         console.error('Error retrieving beekeeper address:', error);
-        this.metadataSubject.next(null); // Emit null or empty data to indicate error
+        this.metadataSubject.next(this.lastMatchingMetadata); // Emit the last matching metadata
       }
 
       } else {
         console.error('Hashes do not match. Authentication failed.');
-        this.metadataSubject.next(null); // Emit null or empty data to indicate error
+        this.metadataSubject.next(this.lastMatchingMetadata); // Emit the last matching metadata
       }
     };
 
