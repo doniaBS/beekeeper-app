@@ -5,14 +5,19 @@
 </ion-header>
 
 <ion-content>
-  <div *ngIf="metadata">
-    <pre>{{ metadata | json }}</pre>
-  </div>
-  <div *ngIf="!metadata && !lastMatchingMetadata">
-    <ion-spinner></ion-spinner>
-    <p>Loading metadata...</p>
-  </div>
-  <div *ngIf="metadata === null && !lastMatchingMetadata">
-    <p>No matching metadata found for the logged-in beekeeper address.</p>
+  <div class="container">
+    <div class="metadata-content" *ngIf="metadata; else loading">
+      <h2>Beekeeper Metadata</h2>
+      <table>
+        <tr *ngFor="let key of metadataKeys">
+          <td class="key">{{ key }}</td>
+          <td class="value">{{ metadata[key] }}</td>
+        </tr>
+      </table>
+    </div>
+    <ng-template #loading>
+      <ion-spinner></ion-spinner>
+      <p class="loading-text">Loading metadata...</p>
+    </ng-template>
   </div>
 </ion-content>
