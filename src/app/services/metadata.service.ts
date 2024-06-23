@@ -1,8 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
+import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import * as crypto from 'crypto-js';
 import Web3 from 'web3';
+import detectEthereumProvider from '@metamask/detect-provider';
+
+type MetaMaskEthereumProvider = {
+  isMetaMask?: boolean;
+  request?: (args: { method: string; params?: any[] }) => Promise<any>;
+};
 
 @Injectable({
   providedIn: 'root'
@@ -13,9 +20,12 @@ export class MetadataService {
   private sharedSecret: string = 'dOnIaLIPAH24Techoney';
   private web3: Web3;
   private contract: any;
+  private beekeeperAddress: string | null = null;
+  private provider: MetaMaskEthereumProvider | null = null;
+  private loggedInAccount: string | null = null;
 
-  constructor() { 
-    this.web3 = new Web3('http://localhost:7545'); // Connect to Ganache
+  constructor(private router: Router) { 
+    this.web3 = new Web3(Web3.givenProvider || 'http://localhost:7545'); // Connect to Ganache
     this.contract = new this.web3.eth.Contract(environment.contractABI, environment.contractAddress);
     this.connect();
   }
@@ -64,12 +74,23 @@ export class MetadataService {
         try {
         const beekeeperAddress = await this.getBeekeeperAddress(beekeeperId);
         console.log(`Beekeeper Address: ${beekeeperAddress}`);
+
+        // Check if the beekeeperAddress matches the loggedInAccount
+          if (beekeeperAddress.toLowerCase() === this.loggedInAccount?.toLowerCase()) {
+            this.metadataSubject.next(metadata);
+          } else {
+            console.warn('Beekeeper address does not match the logged-in account');
+            this.metadataSubject.next(null); // Emit null or empty data to indicate no match
+          }
+
       } catch (error) {
         console.error('Error retrieving beekeeper address:', error);
+        this.metadataSubject.next(null); // Emit null or empty data to indicate error
       }
 
       } else {
         console.error('Hashes do not match. Authentication failed.');
+        this.metadataSubject.next(null); // Emit null or empty data to indicate error
       }
     };
 
@@ -98,6 +119,25 @@ export class MetadataService {
     } catch (error) {
       console.error('Smart contract call failed:', error);
       throw error;
+    }
+  }
+
+  // Function to log in with MetaMask
+  async loginWithMetaMask(): Promise<void> {
+    this.provider = (await detectEthereumProvider()) as MetaMaskEthereumProvider;
+    if (this.provider) {
+      this.web3 = new Web3(this.provider as any);
+      try {
+        await this.provider.request!({ method: 'eth_requestAccounts' });
+        const accounts = await this.web3.eth.getAccounts();
+        this.loggedInAccount = accounts[0];
+        console.log('Connected account:', this.loggedInAccount);
+        this.router.navigate(['/metadata']);
+      } catch (error) {
+        console.error('User denied account access', error);
+      }
+    } else {
+      console.error('Please install MetaMask!');
     }
   }
 }

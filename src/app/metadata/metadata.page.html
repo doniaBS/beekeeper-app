@@ -12,4 +12,7 @@
     <ion-spinner></ion-spinner>
     <p>Loading metadata...</p>
   </div>
+  <div *ngIf="metadata === null">
+    <p>No matching metadata found for the logged-in beekeeper address.</p>
+  </div>
 </ion-content>

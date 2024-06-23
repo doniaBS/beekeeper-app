@@ -2,10 +2,14 @@ import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'metadata', pathMatch: 'full' },
-  {
-    path: 'metadata',
-    loadChildren: () => import('./metadata/metadata.module').then(m => m.MetadataPageModule)
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { 
+    path: 'login', 
+    loadChildren: () => import('./login/login.module').then(m => m.LoginPageModule) 
+  },
+
+  { path: 'metadata', 
+    loadChildren: () => import('./metadata/metadata.module').then(m => m.MetadataPageModule) 
   }
 ];
 
