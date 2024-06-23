@@ -7,6 +7,21 @@ export const environment = {
   gatewayWsUrl: 'ws://localhost:8765',
   contractABI : [ 
     {
+      "constant": true,
+      "inputs": [],
+      "name": "ipfsHashCount",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function",
+      "signature": "0xfe250911"
+    },
+    {
       "inputs": [
         {
           "name": "_ganacheAddresses",
@@ -22,19 +37,19 @@ export const environment = {
       "anonymous": false,
       "inputs": [
         {
-          "indexed": false,
-          "name": "beekeeperId",
+          "indexed": true,
+          "name": "hashIndex",
           "type": "uint256"
         },
         {
           "indexed": false,
-          "name": "beekeeperAddress",
-          "type": "address"
+          "name": "ipfsHash",
+          "type": "string"
         }
       ],
-      "name": "beekeeperIdBeekeeperAddress",
+      "name": "ipfsHashStore",
       "type": "event",
-      "signature": "0x82fc758beb45430ad6779b890bace00d6cc0f9f5027be9f7b097331c465b1863"
+      "signature": "0x80738acc89913722136c6a958e89af27743e61b28bf112bb22814097c798e104"
     },
     {
       "constant": false,
@@ -55,9 +70,44 @@ export const environment = {
       "stateMutability": "nonpayable",
       "type": "function",
       "signature": "0xb137ca64"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "ipfsHash",
+          "type": "string"
+        }
+      ],
+      "name": "storeIpfsHash",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function",
+      "signature": "0xcacde1d0"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "getIpfsHash",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function",
+      "signature": "0xd450fbc9"
     }
   ],
-  contractAddress : '0x16EBeb44B715379db53Bde3FaE8879274dEaf51c',
+  contractAddress : '0x41CA45648Eb235164DD2aF09B55A1Df96B1249d4',
   pinataApiKey: 'd4ff07b0e166ec5b7db8',
   pinataSecretApiKey: '1da36dca5acaa1640cf937790bf16129e9dc9d97c6c1d32df5c16d402b0ed0da',
 };

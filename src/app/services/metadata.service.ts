@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import * as crypto from 'crypto-js';
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
+import { IpfsService } from '../services/ipfs.service';
 
 type MetaMaskEthereumProvider = {
   isMetaMask?: boolean;
@@ -25,7 +26,7 @@ export class MetadataService {
   private loggedInAccount: string | null = null;
   private lastMatchingMetadata: any = null;
 
-  constructor(private router: Router) { 
+  constructor(private router: Router, private ipfsService: IpfsService) { 
     this.web3 = new Web3(Web3.givenProvider || 'http://localhost:7545'); // Connect to Ganache
     this.contract = new this.web3.eth.Contract(environment.contractABI, environment.contractAddress);
     this.connect();
@@ -75,6 +76,17 @@ export class MetadataService {
         try {
         const beekeeperAddress = await this.getBeekeeperAddress(beekeeperId);
         console.log(`Beekeeper Address: ${beekeeperAddress}`);
+
+        // Upload metadata to Pinata and get IPFS hash
+        const ipfsHash = await this.ipfsService.addDataToPinata(metadata);
+        console.log(`Metadata synced to Pinata: ${ipfsHash}`);
+
+        // Convert IPFS hash to string
+        const ipfsHashString = ipfsHash.toString();
+
+        // Send IPFS hash to smart contract
+        const txHash = await this.sendHashToContract(ipfsHashString);
+        console.log(`IPFS Hash stored in smart contract. Transaction hash: ${txHash}`);
 
         // Check if the beekeeperAddress matches the loggedInAccount
           if (beekeeperAddress.toLowerCase() === this.loggedInAccount?.toLowerCase()) {
@@ -140,6 +152,18 @@ export class MetadataService {
       }
     } else {
       console.error('Please install MetaMask!');
+    }
+  }
+
+  // Function to send IPFS hash to the smart contract
+  private async sendHashToContract(ipfsHash: string): Promise<string> {
+    const accounts = await this.web3.eth.getAccounts();
+    try {
+      const result = await this.contract.methods.storeIpfsHash(ipfsHash).send({ from: accounts[0], gas: 5000000 });
+      return result.transactionHash;
+    } catch (error) {
+      console.error('Error sending IPFS hash to smart contract:', error);
+      throw error;
     }
   }
 }
