@@ -21,12 +21,11 @@ export class MetadataService {
   private sharedSecret: string = 'dOnIaLIPAH24Techoney';
   private web3: Web3;
   private contract: any;
-  private beekeeperAddress: string | null = null;
   private provider: MetaMaskEthereumProvider | null = null;
-  private loggedInAccount: string | null = null;
+  public loggedInAccount: string | null = null;
   private lastMatchingMetadata: any = null;
 
-  constructor(private router: Router, private ipfsService: IpfsService) { 
+  constructor(private router: Router, private ipfsService: IpfsService) {
     this.web3 = new Web3(Web3.givenProvider || 'http://localhost:7545'); // Connect to Ganache
     this.contract = new this.web3.eth.Contract(environment.contractABI, environment.contractAddress);
     this.connect();
@@ -68,43 +67,45 @@ export class MetadataService {
 
       if (calculatedHash === receivedHash) {
         console.log('Hashes match. Authentication successful.');
-        this.metadataSubject.next(metadata);
 
         // Process metadata and interact with the smart contract
         const beekeeperId = metadata.beekeeper_id;
-        console.log(beekeeperId)
+        console.log(beekeeperId);
         try {
-        const beekeeperAddress = await this.getBeekeeperAddress(beekeeperId);
-        console.log(`Beekeeper Address: ${beekeeperAddress}`);
+          const beekeeperAddress = await this.getBeekeeperAddress(beekeeperId);
+          console.log(`Beekeeper Address: ${beekeeperAddress}`);
 
-        // Upload metadata to Pinata and get IPFS hash
-        const ipfsHash = await this.ipfsService.addDataToPinata(metadata);
-        console.log(`Metadata synced to Pinata: ${ipfsHash}`);
+          // Upload metadata to Pinata and get IPFS hash
+          const ipfsHash = await this.ipfsService.addDataToPinata(metadata);
+          console.log(`Metadata synced to Pinata: ${ipfsHash}`);
 
-        // Convert IPFS hash to string
-        const ipfsHashString = ipfsHash.toString();
+          // Convert IPFS hash to string
+          const ipfsHashString = ipfsHash.toString();
 
-        // Send IPFS hash to smart contract
-        const txHash = await this.sendHashToContract(ipfsHashString);
-        console.log(`IPFS Hash stored in smart contract. Transaction hash: ${txHash}`);
+          // Send IPFS hash to smart contract
+          const txHash = await this.sendHashToContract(ipfsHashString);
+          console.log(`IPFS Hash stored in smart contract. Transaction hash: ${txHash}`);
 
-        // Check if the beekeeperAddress matches the loggedInAccount
-          if (beekeeperAddress.toLowerCase() === this.loggedInAccount?.toLowerCase()) {
+          // Check if the beekeeperAddress matches the loggedInAccount
+          if (beekeeperAddress && this.loggedInAccount && beekeeperAddress.toLowerCase() === this.loggedInAccount.toLowerCase()) {
             this.lastMatchingMetadata = metadata; // Store the matching metadata
-            this.metadataSubject.next(metadata);
+            this.metadataSubject.next(this.lastMatchingMetadata);
           } else {
             console.warn('Beekeeper address does not match the logged-in account');
-            this.metadataSubject.next(this.lastMatchingMetadata); // Emit the last matching metadata
+            // Do not emit the new metadata if addresses do not match
+            this.metadataSubject.next(null);
           }
 
-      } catch (error) {
-        console.error('Error retrieving beekeeper address:', error);
-        this.metadataSubject.next(this.lastMatchingMetadata); // Emit the last matching metadata
-      }
+        } catch (error) {
+          console.error('Error retrieving beekeeper address:', error);
+          // Do not emit the new metadata if an error occurs
+          this.metadataSubject.next(null);
+        }
 
       } else {
         console.error('Hashes do not match. Authentication failed.');
-        this.metadataSubject.next(this.lastMatchingMetadata); // Emit the last matching metadata
+        // Do not emit the new metadata if authentication fails
+        this.metadataSubject.next(null);
       }
     };
 

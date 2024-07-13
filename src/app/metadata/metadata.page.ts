@@ -10,8 +10,8 @@ import { IpfsService } from '../services/ipfs.service';
 export class MetadataPage implements OnInit {
   metadata: any;
   lastMatchingMetadata: any = null;
-  lastMatchingMetadataKeys: string[] = [];
   metadataKeys: string[] = [];
+  lastMatchingMetadataKeys: string[] = [];
   isSyncing: boolean = false;
 
   constructor(private metadataService: MetadataService, private ipfsService: IpfsService) {}
@@ -20,21 +20,23 @@ export class MetadataPage implements OnInit {
     this.metadataService.getMetadata().subscribe(
       data => {
         if (data) {
+          // Metadata available
           this.metadata = data;
           this.metadataKeys = Object.keys(this.metadata);
-          this.lastMatchingMetadata = data; // Store the last matching metadata
-          this.lastMatchingMetadataKeys = Object.keys(this.lastMatchingMetadata);
-          console.log('Metadata received:', this.metadata);
+          this.lastMatchingMetadata = data; // Update the last matching metadata
+          this.lastMatchingMetadataKeys = this.metadataKeys;
+          console.log('Metadata received and matched:', this.metadata);
           this.syncToPinata(this.metadata); // Start the background sync process
-
         } else if (this.lastMatchingMetadata) {
+          // No new metadata but we have previous matching metadata
           console.log('Using last matching metadata');
-          this.metadata = this.lastMatchingMetadata; // Use the last matching metadata
-          this.metadataKeys = Object.keys(this.lastMatchingMetadata);
-
+          this.metadata = null; // Clear the current metadata
+          this.metadataKeys = [];
+          // Use the last matching metadata
         } else {
+          // No matching metadata found or error occurred and no previous matching metadata
           console.warn('No matching metadata found or error occurred');
-          this.metadata = null; // Set metadata to null if no match or error and no last matching metadata
+          this.metadata = null; // Set metadata to null
         }
       },
       error => console.error('Error fetching metadata:', error)
@@ -47,9 +49,8 @@ export class MetadataPage implements OnInit {
       const result = await this.ipfsService.addDataToPinata(metadata);
       console.log('Metadata synced to Pinata:', result);
     } catch (error) {
-      console.error('Error syncing metadata to Pinata:', error);
-    } finally {
-      this.isSyncing = false;
+      console.error('Error syncing to Pinata:', error);
     }
+    this.isSyncing = false;
   }
 }
